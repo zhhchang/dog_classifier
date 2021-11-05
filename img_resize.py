@@ -29,6 +29,7 @@ def convertjpg(jpgfile, outdir, width, length):
     #     args.graynum = args.graynum + 1
         
     try:
+        img = img.convert("RGB")
         new_img = img.resize((width, length), Image.BILINEAR)
         new_img.save(os.path.join(outdir, os.path.basename(jpgfile))) 
     except Exception as e:
