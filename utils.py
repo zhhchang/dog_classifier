@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
-
+import math
 
 
 def display_num_param(net):
@@ -143,58 +143,7 @@ def show_prob_mnist(p):
 
 
 
-def show_prob_dog_classifier(p):
 
-    p=p.data.squeeze().numpy()
-
-    ft=15
-    label = ('affenpinscher', 'beagle', 'boxer', 'chihuahua', 'frenchbulldog', 'goldenretriever', 'rottweiler', 'schnauzer', 'sheepdog','spaniel')
-    #p=p.data.squeeze().numpy()
-    y_pos = np.arange(len(p))*1.2
-    target=2
-    width=0.9
-    col= 'blue'
-    #col='darkgreen'
-
-    plt.rcdefaults()
-    fig, ax = plt.subplots()
-
-    # the plot
-    ax.barh(y_pos, p, width , align='center', color=col)
-
-    ax.set_xlim([0, 1.3])
-    #ax.set_ylim([-0.8, len(p)*1.2-1+0.8])
-
-    # y label
-    ax.set_yticks(y_pos)
-    ax.set_yticklabels(label, fontsize=ft)
-    ax.invert_yaxis()  
-    #ax.set_xlabel('Performance')
-    #ax.set_title('How fast do you want to go today?')
-
-    # x label
-    ax.set_xticklabels([])
-    ax.set_xticks([])
-    #x_pos=np.array([0, 0.25 , 0.5 , 0.75 , 1])
-    #ax.set_xticks(x_pos)
-    #ax.set_xticklabels( [0, 0.25 , 0.5 , 0.75 , 1] , fontsize=15)
-
-    ax.spines['right'].set_visible(False)
-    ax.spines['top'].set_visible(False)
-    ax.spines['bottom'].set_visible(False)
-    ax.spines['left'].set_linewidth(4)
-
-
-    for i in range(len(p)):
-        str_nb="{0:.2f}".format(p[i])
-        ax.text( p[i] + 0.05 , y_pos[i] ,str_nb ,
-                 horizontalalignment='left', verticalalignment='center',
-                 transform=ax.transData, color= col,fontsize=ft)
-
-
-
-    plt.show()
-    #fig.savefig('pic/prob', dpi=96, bbox_inches="tight")
 
 
 def show_prob_fashion_mnist(p):
@@ -342,3 +291,20 @@ def check_cifar_dataset_exists(path_data='../../data/'):
     return path_data
     
         
+def normalize_gradient(net):
+
+    grad_norm_sq=0
+
+    for p in net.parameters():
+        grad_norm_sq += p.grad.data.norm()**2
+
+    grad_norm=math.sqrt(grad_norm_sq)
+   
+    if grad_norm<1e-4:
+        net.zero_grad()
+        print('grad norm close to zero')
+    else:    
+        for p in net.parameters():
+             p.grad.data.div_(grad_norm)
+
+    return grad_norm
